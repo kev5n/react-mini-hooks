@@ -1,0 +1,19 @@
+{
+  "name": "my-hooks",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.4",
+    "vite": "^3.0.7",
+    "husky": "^8.0.0",
+    "eslint": "^8.23.0",
+    "prettier": "^2.7.1"
+  }
+}
