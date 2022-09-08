@@ -1,4 +1,5 @@
 import { useEffect } from './hook/useEffect';
+import { useMemo } from './hook/useMemo';
 import { useState } from './hook/useState';
 
 const useApp = () => {
@@ -12,6 +13,8 @@ const useApp = () => {
   useEffect(() => {
     console.log(num, 'num');
   }, [num]);
+
+  useMemo(() => {}, []);
   return { num, updateNum };
 };
 
