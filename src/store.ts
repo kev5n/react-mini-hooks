@@ -29,7 +29,7 @@ export const hookStore = initStore();
 
 export function run() {
   hookStore.workInProgressHook = hookStore.fiber.memoizeState;
-  console.log(hookStore);
+  // console.log(hookStore);
   hookStore.fiber.stateNode();
   hookStore.isMount = false;
 }

@@ -1,59 +1,57 @@
-import { hookStore } from "../../store";
-import { updateWorkInProgressHook } from "../../utils";
+import { hookStore } from '../../store';
+import { areHookInputsEqual, updateWorkInProgressHook } from '../../utils';
 
-export function useEffect<K>(
+type IUseEffect = [
   create: () => (() => void) | void,
-  deps: Array<K> | void | null
-) {
-  return hookStore.isMount
-    ? mountEffectImpl(create, deps)
-    : updateEffectImpl(create, deps);
-  // let destroy = undefined;
+  deps: any[] | void | null,
+];
+type Effect = {
+  create: () => (() => void) | void;
+  destroy: (() => void) | void;
+  deps: Array<any> | null;
+  next: Effect;
+};
 
-  // const effect = {
-  //   create,
-  //   destroy,
-  //   deps,
-  //   // Circular
-  //   next: null,
-  // };
-
-  // console.log(deps);
+function createFunctionComponentUpdateQueue() {
+  return {
+    lastEffect: null,
+    stores: null,
+  };
 }
-
-function mountEffectImpl<K>(
-  create: () => (() => void) | void,
-  deps: Array<K> | void | null
-) {
+export function useEffect(...props: IUseEffect) {
+  return hookStore.isMount ? mountEffectImpl(props) : updateEffectImpl(props);
+}
+function mountEffectImpl([create, deps]: IUseEffect) {
   const hook = updateWorkInProgressHook();
+
   const nextDeps = deps === undefined ? null : deps;
-  hook.memoizeState = pushEffect(create, undefined, nextDeps);
+  hook.memoizeState = pushEffect(create, nextDeps);
 }
 
-function updateEffectImpl<K>(
-  create: () => (() => void) | void,
-  deps: Array<K> | void | null
-) {}
+function updateEffectImpl([create, deps]: IUseEffect) {
+  const hook = updateWorkInProgressHook();
+  const oldDeps = hook.memoizeState.deps;
+  if (deps && !areHookInputsEqual(deps, oldDeps)) {
+    const inset = create();
+    hook.memoizeState.deps = deps;
+  }
 
-function pushEffect(create: () => void | (() => void), destroy: undefined, deps:any) {
-  const effect: any = {
+  return hook;
+}
+
+function pushEffect(
+  create: () => void | (() => void),
+  deps: any,
+  destroy?: undefined,
+) {
+  const inset = create();
+  const effect: Effect = {
     create,
     destroy,
     deps,
     // Circular
-    next: null,
+    next: null as any,
   };
-  
-  let componentUpdateQueue: any = hookStore.workInProgressHook;
-  const lastEffect = componentUpdateQueue.lastEffect;
-  if (lastEffect === null) {
-    componentUpdateQueue.lastEffect = effect.next = effect;
-  } else {
-    const firstEffect = lastEffect.next;
-    lastEffect.next = effect;
-    effect.next = firstEffect;
-    componentUpdateQueue.lastEffect = effect;
-  }
 
   return effect;
 }
