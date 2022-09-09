@@ -1,10 +1,7 @@
 import { hookStore } from '../../store';
 import { areHookInputsEqual, updateWorkInProgressHook } from '../../utils';
 
-type IUseEffect = [
-  create: () => (() => void) | void,
-  deps: any[] | void | null,
-];
+type IUseEffect = [create: () => (() => void) | void, deps: any[] | null];
 type Effect = {
   create: () => (() => void) | void;
   destroy: (() => void) | void;
@@ -12,12 +9,6 @@ type Effect = {
   next: Effect;
 };
 
-function createFunctionComponentUpdateQueue() {
-  return {
-    lastEffect: null,
-    stores: null,
-  };
-}
 export function useEffect(...props: IUseEffect) {
   return hookStore.isMount ? mountEffectImpl(props) : updateEffectImpl(props);
 }
@@ -25,17 +16,15 @@ function mountEffectImpl([create, deps]: IUseEffect) {
   const hook = updateWorkInProgressHook();
 
   const nextDeps = deps === undefined ? null : deps;
-  hook.memoizeState = pushEffect(create, nextDeps);
+  hook.memoizedState = pushEffect(create, nextDeps);
 }
 
 function updateEffectImpl([create, deps]: IUseEffect) {
   const hook = updateWorkInProgressHook();
-  const oldDeps = hook.memoizeState.deps;
-  if (deps && !areHookInputsEqual(deps, oldDeps)) {
-    const inset = create();
-    hook.memoizeState.deps = deps;
+  const oldDeps = hook.memoizedState.deps;
+  if (deps !== null && !areHookInputsEqual(deps, oldDeps)) {
+    hook.memoizedState = pushEffect(create, deps);
   }
-
   return hook;
 }
 
@@ -47,9 +36,8 @@ function pushEffect(
   const inset = create();
   const effect: Effect = {
     create,
-    destroy,
+    destroy: destroy || inset,
     deps,
-    // Circular
     next: null as any,
   };
 

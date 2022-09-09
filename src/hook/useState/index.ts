@@ -1,11 +1,11 @@
-import { hookStore, run } from "../../store";
-import { IHookQueue } from "../../types";
-import { updateWorkInProgressHook } from "../../utils";
+import { hookStore, run } from '../../store';
+import { IHookQueue } from '../../types';
+import { updateWorkInProgressHook } from '../../utils';
 
-function dispatchSetState(queue: any, action: any) {
-  const update: any = {
+function dispatchSetState<T>(queue: IHookQueue, action: (action: T) => void) {
+  const update = {
     action,
-    next: null,
+    next: null as any,
   };
 
   if (queue.pending === null) {
@@ -19,32 +19,30 @@ function dispatchSetState(queue: any, action: any) {
   run();
 }
 
-function useState<K>(initialState?: K) {
-  return hookStore.isMount ? mountState(initialState) : updateState();
-}
-
 function mountState<K>(initialState?: K) {
   const hook = updateWorkInProgressHook();
 
-  if (typeof initialState === "function") {
+  if (typeof initialState === 'function') {
     initialState = initialState();
   }
 
-  hook.memoizeState = initialState;
+  hook.memoizedState = initialState;
+
   const queue: IHookQueue = {
     pending: null,
     dispatch: null,
   };
   hook.queue = queue;
+
   const dispatch = (queue.dispatch = dispatchSetState.bind(null, hook.queue));
 
-  return [hook.memoizeState, dispatch];
+  return [hook.memoizedState, dispatch];
 }
 
 function updateState() {
   const hook = updateWorkInProgressHook();
 
-  let baseState = hook.memoizeState;
+  let baseState = hook.memoizedState;
 
   if (hook.queue.pending) {
     let firstUpdate = hook.queue.pending.next;
@@ -57,8 +55,13 @@ function updateState() {
 
     hook.queue.pending = null;
   }
-  hook.memoizeState = baseState;
+  hook.memoizedState = baseState;
 
   return [baseState, dispatchSetState.bind(null, hook.queue)];
 }
+
+function useState<K>(initialState?: K) {
+  return hookStore.isMount ? mountState(initialState) : updateState();
+}
+
 export { useState };

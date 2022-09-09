@@ -1,3 +1,4 @@
+import { useCallback } from './hook/useCallback';
 import { useEffect } from './hook/useEffect';
 import { useMemo } from './hook/useMemo';
 import { useState } from './hook/useState';
@@ -5,16 +6,25 @@ import { useState } from './hook/useState';
 const useApp = () => {
   const [num, updateNum] = useState(1);
   const [num1, updateNum1] = useState(1);
+  const num2 = useMemo(() => {
+    return num + 1;
+  }, [num]);
 
   useEffect(() => {
     console.log(num1, 'num1');
   }, [num1]);
 
-  useEffect(() => {
+  const getNum = useCallback(() => {
     console.log(num, 'num');
   }, [num]);
 
-  useMemo(() => {}, []);
+  useEffect(() => {
+    console.log(num, 'num');
+    console.log(num2, 'num2');
+    getNum();
+  }, [num]);
+
+  // useMemo(() => {}, []);
   return { num, updateNum };
 };
 
