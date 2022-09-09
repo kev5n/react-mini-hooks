@@ -1,7 +1,7 @@
 import { hookStore } from './store';
 import { IHook } from './types';
 
-//获取当前hook
+//get current hook
 export const updateWorkInProgressHook = () => {
   let hook: IHook;
 
@@ -12,11 +12,11 @@ export const updateWorkInProgressHook = () => {
         pending: null,
         dispatch: null,
       },
-      memoizeState: null,
+      memoizedState: null,
       next: null,
     };
-    if (!fiber.memoizeState) {
-      fiber.memoizeState = hook;
+    if (!fiber.memoizedState) {
+      fiber.memoizedState = hook;
     } else {
       if (hookStore.workInProgressHook) {
         hookStore.workInProgressHook.next = hook;
@@ -31,7 +31,11 @@ export const updateWorkInProgressHook = () => {
   return hook;
 };
 
-export function areHookInputsEqual(nextDeps: Array<any>, prevDeps: Array<any>) {
+//浅比较数据
+export function areHookInputsEqual<T, K>(
+  nextDeps: Array<T>,
+  prevDeps: Array<K>,
+) {
   for (let i = 0; i < prevDeps.length && i < nextDeps.length; i++) {
     if (Object.is(nextDeps[i], prevDeps[i])) {
       continue;

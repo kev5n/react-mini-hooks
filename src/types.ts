@@ -4,7 +4,7 @@ export interface IHookQueue {
 }
 
 export interface IHook {
-  queue:IHookQueue
-  memoizeState: any;
+  queue: IHookQueue;
+  memoizedState: any;
   next: IHook | null;
 }

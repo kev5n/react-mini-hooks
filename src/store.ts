@@ -1,5 +1,5 @@
-import { IHook } from "./types";
-import { App } from "./app";
+import { IHook } from './types';
+import { App } from './app';
 
 function initStore() {
   //当前执行的hook
@@ -9,12 +9,12 @@ function initStore() {
 
   const fiber: {
     //保存所有hook
-    memoizeState: IHook | null;
+    memoizedState: IHook | null;
     //保存组件
     stateNode: () => void;
   } = {
     //缓存hook
-    memoizeState: null,
+    memoizedState: null,
     stateNode: App,
   };
 
@@ -28,7 +28,7 @@ function initStore() {
 export const hookStore = initStore();
 
 export function run() {
-  hookStore.workInProgressHook = hookStore.fiber.memoizeState;
+  hookStore.workInProgressHook = hookStore.fiber.memoizedState;
   // console.log(hookStore);
   hookStore.fiber.stateNode();
   hookStore.isMount = false;
