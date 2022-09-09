@@ -1,19 +1,18 @@
 import { hookStore } from '../../store';
 import { areHookInputsEqual, updateWorkInProgressHook } from '../../utils';
 
-function mountMemo<T>(nextCreate: () => T, deps: Array<any> | null): T {
+function mountCallback<T>(callback: T, deps: Array<any> | void | null): T {
   const hook = updateWorkInProgressHook();
   const nextDeps = deps === undefined ? null : deps;
-  const nextValue = nextCreate();
-  hook.memoizedState = [nextValue, nextDeps];
-  return nextValue;
+  hook.memoizedState = [callback, nextDeps];
+  return callback;
 }
-function updateMemo<T>(nextCreate: () => T, deps: Array<any> | void | null): T {
+
+function updateCallback<T>(callback: T, deps: Array<any> | void | null): T {
   const hook = updateWorkInProgressHook();
   const nextDeps = deps === undefined ? null : deps;
   const prevState = hook.memoizedState;
   if (prevState !== null) {
-    // Assume these are defined. If they're not, areHookInputsEqual will warn.
     if (nextDeps !== null) {
       const prevDeps: Array<any> = prevState[1];
       if (areHookInputsEqual(nextDeps, prevDeps)) {
@@ -21,12 +20,12 @@ function updateMemo<T>(nextCreate: () => T, deps: Array<any> | void | null): T {
       }
     }
   }
-  const nextValue = nextCreate();
-  hook.memoizedState = [nextValue, nextDeps];
-  return nextValue;
+  hook.memoizedState = [callback, nextDeps];
+  return callback;
 }
-export const useMemo = <T>(nextCreate: () => T, deps: Array<any> | null) => {
+
+export function useCallback<T>(callback: T, deps: Array<any> | void | null): T {
   return hookStore.isMount
-    ? mountMemo(nextCreate, deps)
-    : updateMemo(nextCreate, deps);
-};
+    ? mountCallback(callback, deps)
+    : updateCallback(callback, deps);
+}
