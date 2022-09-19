@@ -1,11 +1,13 @@
 import { useCallback } from './hook/useCallback';
 import { useEffect } from './hook/useEffect';
 import { useMemo } from './hook/useMemo';
+import { useRef } from './hook/useRef';
 import { useState } from './hook/useState';
 
 const useApp = () => {
   const [num, updateNum] = useState(1);
-  const [num1, updateNum1] = useState(1);
+  const [num1] = useState(1);
+  const ref = useRef(false);
   const num2 = useMemo(() => {
     return num + 1;
   }, [num]);
@@ -21,6 +23,8 @@ const useApp = () => {
   useEffect(() => {
     console.log(num, 'num');
     console.log(num2, 'num2');
+    console.log(ref, 'ref');
+    ref.current = !ref.current;
     getNum();
   }, [num]);
 
@@ -43,3 +47,7 @@ export const App = () => {
     body.appendChild(span);
   }
 };
+
+// let html = render(vdom);
+
+// console.log(html)
